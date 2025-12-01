@@ -141,22 +141,8 @@ impl QuizMutation {
         let user = get_user_from_ctx(ctx).await?;
         let user_id = user.id;
 
-        // TODO: Replace usage logic by
-        let from = start_of_today();
-        let to = end_of_today();
-        let usage_today = {
-            let mut conn = get_conn_from_ctx(ctx).await?;
-            AIHistorySession::count_by_time(&mut conn, user_id, from, to).format_err()?
-        };
-        let user_config = user.config();
-        if let Some(max_usage_per_day) = user_config.max_ai_usage_per_day {
-            if usage_today >= max_usage_per_day {
-                return Err(IkigaiError::new_bad_request(
-                    "You've reached maximum usage of a day. Want more - contact us via rodgers@ikigai.li",
-                ))
-                    .format_err();
-            }
-        }
+        check_daily_ai_usage(ctx, &user).await?;
+
 
         let res = match quiz_type {
             QuizType::SingleChoice => IkigaiAI::generate_single_choice_quizzes(&data).await?,
@@ -300,4 +286,23 @@ fn build_quiz<Q: Serialize, A: Serialize>(
         .answer_data(serde_json::to_value(answer_data).unwrap_or_default())
         .build()
         .ok()
+}
+
+async fn check_daily_ai_usage(ctx: &Context<'_>, user: &User) -> Result<()> {
+    let from = start_of_today();
+    let to = end_of_today();
+    let usage_today = {
+        let mut conn = get_conn_from_ctx(ctx).await?;
+        AIHistorySession::count_by_time(&mut conn, user.id, from, to).format_err()?
+    };
+    let user_config = user.config();
+    if let Some(max_usage_per_day) = user_config.max_ai_usage_per_day {
+        if usage_today >= max_usage_per_day {
+            return Err(IkigaiError::new_bad_request(
+                "You've reached maximum usage of a day. Want more - contact us via rodgers@ikigai.li",
+            ))
+            .format_err();
+        }
+    }
+    Ok(())
 }
