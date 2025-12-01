@@ -1,4 +1,4 @@
-FROM rust:1.71.1-slim-buster
+FROM rust:1.83-slim-bookworm
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get -y install libpq-dev openssl ca-certificates libssl-dev

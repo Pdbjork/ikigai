@@ -25,6 +25,7 @@ services:
   migration:
     image: ghcr.io/ikigai-hq/ikigai-migration:latest
     build:
+      context: ./graphql_server
       dockerfile: Migration.Dockerfile
     environment:
       DATABASE_URL: postgres://ikigai:ikigai@postgres:5432/ikigai
@@ -32,7 +33,9 @@ services:
       postgres:
         condition: service_healthy
   graphql-server:
-    image: ghcr.io/ikigai-hq/ikigai:latest
+    build:
+      context: ./graphql_server
+      dockerfile: Dockerfile
     env_file:
       - ".env"
     depends_on:
@@ -42,17 +45,20 @@ services:
         condition: service_started
       migration:
         condition: service_completed_successfully
-    network_mode: host
+    ports:
+      - "8000:8000"
   ikigai-web-client:
     image: ghcr.io/ikigai-hq/ikigai-web:latest
     depends_on: [graphql-server]
-    network_mode: host
+    ports:
+      - "3000:3000"
   ikigai-ai:
     image: ghcr.io/ikigai-hq/ikigai-ai:latest
     depends_on: []
     environment:
       OPENAI_API_KEY: YOUR_OPENAI_API_KEY
-    network_mode: host
+    ports:
+      - "8001:8001"
 
 volumes:
   postgres_data: {}
