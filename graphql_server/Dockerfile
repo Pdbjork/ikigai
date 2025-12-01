@@ -1,4 +1,7 @@
-FROM ghcr.io/ikigai-hq/ikigai-base:build-base as build-phase
+FROM rust:1.83-slim-bookworm as build-phase
+
+RUN apt-get update && apt-get -y upgrade && \
+    apt-get -y install libpq-dev pkg-config libssl-dev protobuf-compiler perl make
 
 WORKDIR /app
 
@@ -8,6 +11,7 @@ ADD src /app/src
 ADD Cargo.toml /app/
 ADD Cargo.lock /app/
 
+RUN cargo update -p time
 RUN RUST_BACKTRACE=1 cargo build --release
 
 ## ------------------------------------------------------------------------------
