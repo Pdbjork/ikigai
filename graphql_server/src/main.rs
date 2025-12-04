@@ -139,7 +139,7 @@ async fn main() -> std::io::Result<()> {
     log_util::setup_logger().unwrap();
     register_jobs();
 
-    let addr = format!("127.0.0.1:{}", std::env::var("PORT").unwrap());
+    let addr = format!("0.0.0.0:{}", std::env::var("PORT").unwrap());
     info!("Graphql Server will run at {addr}");
     let schema = build_schema();
     HttpServer::new(move || {
