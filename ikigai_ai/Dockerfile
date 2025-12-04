@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
 RUN pip install poetry
+RUN poetry self add poetry-plugin-export
 
 WORKDIR /ikigai_ai
 
@@ -13,4 +14,4 @@ ADD ./src /ikigai_ai/src
 ADD __init__.py /ikigai_ai
 
 EXPOSE 8001
-CMD ["fastapi", "run", "src/index.py", "--port", "8001"]
+CMD ["fastapi", "run", "src/index.py", "--port", "8001", "--host", "0.0.0.0"]
