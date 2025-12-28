@@ -14,4 +14,6 @@ ADD ./src /ikigai_ai/src
 ADD __init__.py /ikigai_ai
 
 EXPOSE 8001
-CMD ["fastapi", "run", "src/index.py", "--port", "8001", "--host", "0.0.0.0"]
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/
+CMD ["uvicorn", "ikigai_ai.src.index:app", "--host", "0.0.0.0", "--port", "8001", "--log-level", "debug"]
